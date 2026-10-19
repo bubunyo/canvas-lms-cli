@@ -117,7 +117,3 @@ Releases are built by [`.github/workflows/release.yml`](.github/workflows/releas
 when a `v*` tag is pushed: tests run on macOS, macOS binaries are built with cgo on a
 macOS runner (arm64 + amd64), Linux and Windows binaries are cross-compiled without cgo
 (amd64 + arm64), and everything is published to a GitHub release with `checksums.txt`.
-
-```bash
-git tag v0.1.0 && git push origin v0.1.0
-```
