@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"context"
@@ -13,10 +13,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bubunyo/canvas-cli/internal/canvas"
-	"github.com/bubunyo/canvas-cli/internal/config"
-	"github.com/bubunyo/canvas-cli/internal/creds"
+	"github.com/bubunyo/canvas-lms-cli/internal/canvas"
+	"github.com/bubunyo/canvas-lms-cli/internal/config"
+	"github.com/bubunyo/canvas-lms-cli/internal/creds"
 )
+
+// Version is set at build time: -ldflags "-X github.com/bubunyo/canvas-lms-cli/internal/cli.Version=v1.2.3".
+var Version = "dev"
 
 var (
 	cfg        *config.Config
@@ -25,8 +28,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:           "canvas",
+	Use:           "canvas-cli",
 	Short:         "Command-line client for Canvas LMS",
+	Version:       Version,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
@@ -56,7 +60,7 @@ func Execute() {
 func client() (*canvas.Client, error) {
 	c, err := creds.Load(cfg.BaseURL)
 	if errors.Is(err, creds.ErrNotFound) {
-		return nil, fmt.Errorf("not logged in to %s: run `canvas auth login`", cfg.BaseURL)
+		return nil, fmt.Errorf("not logged in to %s: run `canvas-cli auth login`", cfg.BaseURL)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("reading keychain: %w", err)
@@ -103,7 +107,7 @@ func resolveCourse(ctx context.Context, cl *canvas.Client, arg string) (canvas.I
 	case 1:
 		return matches[0].ID, nil
 	case 0:
-		return "", fmt.Errorf("no course matches %q (see `canvas courses`)", arg)
+		return "", fmt.Errorf("no course matches %q (see `canvas-cli courses`)", arg)
 	default:
 		names := make([]string, len(matches))
 		for i, m := range matches {

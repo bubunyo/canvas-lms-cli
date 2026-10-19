@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bubunyo/canvas-cli/internal/creds"
+	"github.com/bubunyo/canvas-lms-cli/internal/creds"
 )
 
 func TestGetAllFollowsLinkHeader(t *testing.T) {

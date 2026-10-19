@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	htmltomarkdown "github.com/JohannesKaufmann/html-to-markdown/v2"
 	"github.com/spf13/cobra"
 
-	"github.com/bubunyo/canvas-cli/internal/canvas"
+	"github.com/bubunyo/canvas-lms-cli/internal/canvas"
 )
 
 var (
@@ -111,7 +111,7 @@ func selectModules(mods []canvas.Module, queries []string) ([]canvas.Module, err
 		}
 		switch len(matches) {
 		case 0:
-			return nil, fmt.Errorf("no module matches %q (see `canvas modules <course>`)", q)
+			return nil, fmt.Errorf("no module matches %q (see `canvas-cli modules <course>`)", q)
 		case 1:
 			out = append(out, matches[0])
 		default:

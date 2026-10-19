@@ -1,4 +1,4 @@
-module github.com/bubunyo/canvas-cli
+module github.com/bubunyo/canvas-lms-cli
 
 go 1.27.1
 

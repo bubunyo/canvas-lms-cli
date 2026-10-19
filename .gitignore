@@ -1,2 +1,4 @@
 /canvas
+/canvas-cli
+/dist
 *.har

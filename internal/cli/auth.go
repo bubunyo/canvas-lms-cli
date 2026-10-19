@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"bufio"
@@ -11,9 +11,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bubunyo/canvas-cli/internal/canvas"
-	"github.com/bubunyo/canvas-cli/internal/creds"
-	"github.com/bubunyo/canvas-cli/internal/webview"
+	"github.com/bubunyo/canvas-lms-cli/internal/canvas"
+	"github.com/bubunyo/canvas-lms-cli/internal/creds"
+	"github.com/bubunyo/canvas-lms-cli/internal/webview"
 )
 
 var authCmd = &cobra.Command{Use: "auth", Short: "Log in, inspect, or log out"}
@@ -106,7 +106,7 @@ func loginWithBrowser(ctx context.Context) error {
 	if err := saveLogin(cookieCreds); err != nil {
 		return err
 	}
-	fmt.Printf("Logged in to %s as %s (session cookies; re-run `canvas auth login` when it expires).\n", cfg.BaseURL, me.Name)
+	fmt.Printf("Logged in to %s as %s (session cookies; re-run `canvas-cli auth login` when it expires).\n", cfg.BaseURL, me.Name)
 	return nil
 }
 

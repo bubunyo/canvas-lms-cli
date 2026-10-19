@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bubunyo/canvas-cli/internal/creds"
+	"github.com/bubunyo/canvas-lms-cli/internal/creds"
 )
 
-var ErrUnauthorized = errors.New("not authenticated (session expired or token revoked): run `canvas auth login`")
+var ErrUnauthorized = errors.New("not authenticated (session expired or token revoked): run `canvas-cli auth login`")
 
 type APIError struct {
 	Status  int

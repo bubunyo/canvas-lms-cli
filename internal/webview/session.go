@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/bubunyo/canvas-cli/internal/creds"
+	"github.com/bubunyo/canvas-lms-cli/internal/creds"
 )
 
 type Session struct {

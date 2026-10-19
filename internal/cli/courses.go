@@ -1,4 +1,4 @@
-package cmd
+package cli
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/bubunyo/canvas-cli/internal/canvas"
+	"github.com/bubunyo/canvas-lms-cli/internal/canvas"
 )
 
 var coursesAll bool
@@ -198,7 +198,7 @@ var missingCmd = &cobra.Command{
 
 var apiCmd = &cobra.Command{
 	Use:   "api <path>",
-	Short: "Authenticated GET against any API path, e.g. `canvas api /api/v1/users/self/profile`",
+	Short: "Authenticated GET against any API path, e.g. `canvas-cli api /api/v1/users/self/profile`",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cl, err := client()

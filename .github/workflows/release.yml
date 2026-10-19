@@ -1,0 +1,112 @@
+name: release
+
+# Push a tag like v0.1.0 to build binaries for macOS, Linux and Windows and
+# publish them as a GitHub release. Archive names carry no version so that
+# releases/latest/download/<asset> always resolves (install.sh relies on it).
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  PKG: ./cmd/canvas-cli
+  BIN: canvas-cli
+  LDFLAGS: -s -w -X github.com/bubunyo/canvas-lms-cli/internal/cli.Version=${{ github.ref_name }}
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go test ./...
+
+  # The macOS build uses cgo (WebKit login window), so it must be built on macOS.
+  macos:
+    needs: test
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [arm64, amd64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build
+        env:
+          CGO_ENABLED: "1"
+          GOOS: darwin
+          GOARCH: ${{ matrix.arch }}
+          CC: clang -arch ${{ matrix.arch == 'amd64' && 'x86_64' || 'arm64' }}
+          MACOSX_DEPLOYMENT_TARGET: "12.0"
+        run: |
+          mkdir -p dist/pkg
+          go build -trimpath -ldflags "$LDFLAGS" -o "dist/pkg/$BIN" "$PKG"
+          cp README.md dist/pkg/
+          tar -C dist/pkg -czf "dist/${BIN}_darwin_${{ matrix.arch }}.tar.gz" .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: darwin_${{ matrix.arch }}
+          path: dist/*.tar.gz
+
+  # Linux and Windows build without cgo; login there uses `auth login --token`.
+  linux-windows:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build
+        env:
+          CGO_ENABLED: "0"
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          mkdir -p dist/pkg
+          ext=""; [ "$GOOS" = windows ] && ext=".exe"
+          go build -trimpath -ldflags "$LDFLAGS" -o "dist/pkg/$BIN$ext" "$PKG"
+          cp README.md dist/pkg/
+          name="${BIN}_${GOOS}_${GOARCH}"
+          if [ "$GOOS" = windows ]; then
+            (cd dist/pkg && zip -q "../$name.zip" ./*)
+          else
+            tar -C dist/pkg -czf "dist/$name.tar.gz" .
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.goos }}_${{ matrix.goarch }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+
+  release:
+    needs: [macos, linux-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: cd dist && sha256sum * > checksums.txt && cat checksums.txt
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
